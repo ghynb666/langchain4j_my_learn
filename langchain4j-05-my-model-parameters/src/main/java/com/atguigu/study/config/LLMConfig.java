@@ -1,5 +1,6 @@
 package com.atguigu.study.config;
 
+import com.atguigu.study.listener.TestChatModelListener;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ public class LLMConfig
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .logRequests(true)
                 .logResponses(true)
+                .listeners(List.of(new TestChatModelListener()))
                 .build();
     }
 }
