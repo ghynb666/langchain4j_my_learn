@@ -27,6 +27,7 @@
         <module>langchain4j-14chat-mcp</module>
         <module>langchain4j-01-my-helloworld</module>
         <module>langchain4j-03-my-boot-integration</module>
+        <module>langchain4j-05-my-model-parameters</module>
     </modules>
 
 
