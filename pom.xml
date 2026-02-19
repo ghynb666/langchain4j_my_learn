@@ -28,6 +28,7 @@
         <module>langchain4j-01-my-helloworld</module>
         <module>langchain4j-03-my-boot-integration</module>
         <module>langchain4j-05-my-model-parameters</module>
+        <module>langchain4j-06-my-chat-image</module>
     </modules>
 
 
