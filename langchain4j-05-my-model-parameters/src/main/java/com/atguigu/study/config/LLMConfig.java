@@ -20,13 +20,9 @@ public class LLMConfig
     public ChatModel chatModelQwen()
     {
         return OpenAiChatModel.builder()
-                    .apiKey(System.getenv("aliQwen-api"))
-                    .modelName("qwen-plus")
+                    .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+                    .modelName("qwen-max-0428")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
-                .logRequests(true) // 日志级别设置为debug才有效
-                .logResponses(true)// 日志级别设置为debug才有效
-                .maxRetries(2)
-                .timeout(Duration.ofSeconds(2))//向大模型发送请求时，如在指定时间内没有收到响应，该请求将被中断并报request timed out
                 .build();
     }
 }
