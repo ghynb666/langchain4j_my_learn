@@ -45,8 +45,8 @@ public class ImageModelController
         String result = null;
 
         //第一步，图片转码：通过Base64编码将图片转化为字符串
-        byte[] byteArray = resource.getContentAsByteArray();
-        String base64Data = Base64.getEncoder().encodeToString(byteArray);
+        byte[] contentAsByteArray = resource.getContentAsByteArray();
+        String base64Data = Base64.getEncoder().encodeToString(contentAsByteArray);
 
         //第二步，提示词指定：结合ImageContent和TextContent一起发送到模型进行处理。
         UserMessage userMessage = UserMessage.from(
@@ -55,10 +55,10 @@ public class ImageModelController
         );
         //第三步，API调用：使用OpenAiChatModel来构建请求，并通过chat()方法调用模型。
         //请求内容包括文本提示和图片，模型会根据输入返回分析结果。
-        ChatResponse chatResponse = chatModel.chat(userMessage);
+        ChatResponse response = chatModel.chat(userMessage);
 
         //第四步，解析与输出：从ChatResponse中获取AI大模型的回复，打印出处理后的结果。
-        result = chatResponse.aiMessage().text();
+        result = response.aiMessage().text();
 
         //后台打印
         System.out.println(result);
