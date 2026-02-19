@@ -20,7 +20,7 @@ public class LLMConfig
         return OpenAiChatModel.builder()
                 .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
                 //qwen-vl-max 是一个多模态大模型，支持图片和文本的结合输入，适用于视觉-语言任务。
-                .modelName("qwen-vl-max")
+                .modelName("qwen-vl-max-2025-04-08")
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
@@ -36,7 +36,7 @@ public class LLMConfig
     {
         return WanxImageModel.builder()
                 .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-                .modelName("wanx2.1-t2i-turbo") //图片生成 https://help.aliyun.com/zh/model-studio/text-to-image
+                .modelName("wan2.6-i2v") //图片生成 https://help.aliyun.com/zh/model-studio/text-to-image
                 .build();
     }
 }
