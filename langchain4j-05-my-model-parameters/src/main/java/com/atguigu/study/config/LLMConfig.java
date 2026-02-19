@@ -23,6 +23,8 @@ public class LLMConfig
                     .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
                     .modelName("qwen-max-0428")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .logRequests(true)
+                .logResponses(true)
                 .build();
     }
 }
