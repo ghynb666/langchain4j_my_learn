@@ -30,6 +30,7 @@
         <module>langchain4j-05-my-model-parameters</module>
         <module>langchain4j-06-my-chat-image</module>
         <module>langchain4j-06-my-chat-stream</module>
+        <module>langchain4j-10-my-chat-persistence</module>
     </modules>
 
 
