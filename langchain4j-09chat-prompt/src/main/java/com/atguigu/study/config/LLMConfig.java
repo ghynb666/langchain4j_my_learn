@@ -1,5 +1,6 @@
 package com.atguigu.study.config;
 
+import com.atguigu.study.service.ITAssistant;
 import com.atguigu.study.service.LawAssistant;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -19,8 +20,8 @@ public class LLMConfig
     public ChatModel chatModel()
     {
         return OpenAiChatModel.builder()
-                .apiKey(System.getenv("aliQwen-api"))
-                .modelName("qwen-long")
+                .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+                .modelName("qwen3.5-plus")
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
@@ -28,5 +29,10 @@ public class LLMConfig
     @Bean
     public LawAssistant lawAssistant(ChatModel chatModel) {
         return AiServices.create(LawAssistant.class, chatModel);
+    }
+
+    @Bean
+    public ITAssistant itAssistant(ChatModel chatModel){
+        return AiServices.create(ITAssistant.class,chatModel);
     }
 }
