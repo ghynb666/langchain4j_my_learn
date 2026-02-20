@@ -29,7 +29,7 @@ public class LLMConfig
     {
         return OpenAiChatModel.builder()
                 .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-                .modelName("qwen-plus")
+                .modelName("qwen3.5-plus")
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
@@ -43,7 +43,7 @@ public class LLMConfig
     public StreamingChatModel streamingChatModel(){
         return OpenAiStreamingChatModel.builder()
                     .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-                    .modelName("qwen-plus")
+                    .modelName("qwen3.5-plus")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
