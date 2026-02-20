@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiTokenCountEstimator;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.MemoryId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,6 +50,12 @@ public class LLMConfig
         return AiServices.builder(ChatMemoryAssistant.class)
                 .chatModel(chatModel)
                 //按照memoryId对应创建了一个chatMemory
+                /*
+                    1. 配置聊天记忆提供器，使用MessageWindowChatMemory策略
+                    2. 设置最大消息数量为100条，当超过这个数量时会自动移除最早的消息
+                    3. memoryId参数用于区分不同用户的聊天会话，确保每个用户的记忆独立管理
+                    4. MessageWindowChatMemory是最简单的内存管理策略，按消息数量进行淘汰
+                 */
                 .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(100))
                 .build();
     }
@@ -61,12 +68,23 @@ public class LLMConfig
     @Bean(name = "chatTokenWindowChatMemory")
     public ChatMemoryAssistant chatTokenWindowChatMemory(ChatModel chatModel)
     {
-        //1 TokenCountEstimator默认的token分词器，需要结合Tokenizer计算ChatMessage的token数量
-        TokenCountEstimator openAiTokenCountEstimator = new OpenAiTokenCountEstimator("gpt-4");
+        /*
+         * 创建TokenCountEstimator实例用于估算消息的token数量
+         * 使用OpenAiTokenCountEstimator并指定模型为"gpt-4"
+         * 这个估算器将帮助TokenWindowChatMemory准确计算消息的token消耗
+         */
+        TokenCountEstimator tokenCountEstimator = new OpenAiTokenCountEstimator("gpt-4");
+
 
         return AiServices.builder(ChatMemoryAssistant.class)
                 .chatModel(chatModel)
-                .chatMemoryProvider(memoryId -> TokenWindowChatMemory.withMaxTokens(1000,openAiTokenCountEstimator))
+                /*
+                    1. 配置聊天记忆提供器，使用TokenWindowChatMemory策略
+                    2. 设置最大token数量为1000个，当超过这个数量时会自动移除最早的消息
+                    3. tokenCountEstimator用于估算消息的token数量，这里使用OpenAiTokenCountEstimator
+                    4. TokenWindowChatMemory根据token数量进行淘汰，相比MessageWindow更精确地控制上下文长度
+                 */
+                .chatMemoryProvider(memoryId -> TokenWindowChatMemory.withMaxTokens(1000,tokenCountEstimator))
                 .build();
     }
 }
