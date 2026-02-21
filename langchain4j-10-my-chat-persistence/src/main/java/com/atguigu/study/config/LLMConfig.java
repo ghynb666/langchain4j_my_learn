@@ -1,5 +1,6 @@
 package com.atguigu.study.config;
 
+import com.atguigu.study.service.ChatPersistenceAssistant;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -19,6 +20,8 @@ import org.springframework.context.annotation.Configuration;
 public class LLMConfig
 {
 
+    @Resource
+    private RedisChatMemoryStore redisChatMemoryStore;
 
     @Bean
     public ChatModel chatModel()
@@ -27,6 +30,20 @@ public class LLMConfig
                     .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
                     .modelName("qwen3.5-plus")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .build();
+    }
+
+
+    @Bean
+    public ChatPersistenceAssistant chatPersistenceAssistant(ChatModel chatModel){
+        return AiServices.builder(ChatPersistenceAssistant.class)
+                .chatModel(chatModel)
+                .chatMemoryProvider(memoryId ->
+                        MessageWindowChatMemory.builder()
+                                .id(memoryId)
+                                .chatMemoryStore(redisChatMemoryStore)
+                                .maxMessages(1000)
+                                .build())
                 .build();
     }
 
