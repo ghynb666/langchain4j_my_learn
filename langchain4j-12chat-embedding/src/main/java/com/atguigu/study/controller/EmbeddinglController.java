@@ -32,11 +32,6 @@ public class EmbeddinglController
     @Resource
     private EmbeddingStore<TextSegment> embeddingStore;
 
-
-
-
-
-
     /**
      * 文本向量化测试，看看形成向量后的文本
      * http://localhost:9012/embedding/embed

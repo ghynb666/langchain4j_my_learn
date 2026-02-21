@@ -24,8 +24,8 @@ public class LLMConfig
     public EmbeddingModel embeddingModel()
     {
         return OpenAiEmbeddingModel.builder()
-                    .apiKey(System.getenv("aliQwen-api"))
-                    .modelName("text-embedding-v3")
+                    .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+                    .modelName("qwen3-vl-rerank")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
@@ -41,7 +41,7 @@ public class LLMConfig
     @Bean
     public QdrantClient qdrantClient() {
         QdrantGrpcClient.Builder grpcClientBuilder =
-                QdrantGrpcClient.newBuilder("127.0.0.1", 6334, false);
+                QdrantGrpcClient.newBuilder("127.0.0.1", 6374, false);
         return new QdrantClient(grpcClientBuilder.build());
     }
 
@@ -49,7 +49,7 @@ public class LLMConfig
     public EmbeddingStore<TextSegment> embeddingStore() {
         return QdrantEmbeddingStore.builder()
                 .host("127.0.0.1")
-                .port(6334)
+                .port(6333)
                 .collectionName("test-qdrant")
                 .build();
     }
