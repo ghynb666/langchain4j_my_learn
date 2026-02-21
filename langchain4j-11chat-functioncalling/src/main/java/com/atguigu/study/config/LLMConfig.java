@@ -37,7 +37,7 @@ public class LLMConfig
      * https://docs.langchain4j.dev/tutorials/tools#low-level-tool-api
     * @Auther: zzyybs@126.com
     */
-    /*@Bean
+    @Bean
     public FunctionAssistant functionAssistant(ChatModel chatModel)
     {
         // 工具说明 ToolSpecification
@@ -65,7 +65,7 @@ public class LLMConfig
                 .chatModel(chatModel)
                 .tools(Map.of(toolSpecification, toolExecutor)) // Tools (Function Calling)
                 .build();
-    }*/
+    }
 
 
 
@@ -74,12 +74,12 @@ public class LLMConfig
      * https://docs.langchain4j.dev/tutorials/tools#high-level-tool-api
     * @Auther: zzyybs@126.com
     */
-    @Bean
+   /* @Bean
     public FunctionAssistant functionAssistant(ChatModel chatModel)
     {
         return AiServices.builder(FunctionAssistant.class)
                     .chatModel(chatModel)
                     .tools(new InvoiceHandler())
                 .build();
-    }
+    }*/
 }

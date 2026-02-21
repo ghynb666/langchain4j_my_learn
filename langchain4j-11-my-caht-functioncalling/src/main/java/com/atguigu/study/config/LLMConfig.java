@@ -2,6 +2,7 @@ package com.atguigu.study.config;
 
 import com.atguigu.study.service.FunctionAssistant;
 import com.atguigu.study.service.InvoiceHandler;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -42,28 +43,29 @@ public class LLMConfig
     {
         // 工具说明 ToolSpecification
         ToolSpecification toolSpecification = ToolSpecification.builder()
-                    .name("开具发票助手")
-                    .description("根据用户提交的开票信息，开具发票")
-                    .parameters(JsonObjectSchema.builder()
-                                .addStringProperty("companyName", "公司名称")
-                                .addStringProperty("dutyNumber", "税号序列")
-                                .addStringProperty("amount", "开票金额，保留两位有效数字")
-                            .build())
+                .name("发票工具小助手")
+                .description("根据用户提交的开票信息，开具发票")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("companyName", "公司名称")
+                        .addStringProperty("dutyNumber", "税号序列")
+                        .addStringProperty("amount", "开票金额，保留两位有效数字")
+                        .build())
                 .build();
 
 
         // 业务逻辑 ToolExecutor
-        ToolExecutor toolExecutor = (toolExecutionRequest, memoryId) -> {
-            System.out.println(toolExecutionRequest.id());
-            System.out.println(toolExecutionRequest.name());
-            String arguments1 = toolExecutionRequest.arguments();
-            System.out.println("arguments1****》 " + arguments1);
-            return "开具成功";
+        ToolExecutor toolExecutor = (toolExecutionRequest,memoryId) -> {
+            System.out.println("每次调用的唯一ID:" + toolExecutionRequest.id());
+            System.out.println("调用工具名称:" + toolExecutionRequest.name());
+            String arguments = toolExecutionRequest.arguments();//LLM解析自然语言得到的JSON参数字符串
+
+            return "开具成功!";//这个作为传给LLM，告诉LLM工具执行完毕，LLM根据这个自然语言回答。
         };
+
 
         return AiServices.builder(FunctionAssistant.class)
                 .chatModel(chatModel)
-                .tools(Map.of(toolSpecification, toolExecutor)) // Tools (Function Calling)
+                .tools(Map.of(toolSpecification,toolExecutor)) // Tools (Function Calling)
                 .build();
     }*/
 
