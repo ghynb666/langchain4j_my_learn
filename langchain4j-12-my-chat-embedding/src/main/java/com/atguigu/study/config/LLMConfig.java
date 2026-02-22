@@ -2,8 +2,11 @@ package com.atguigu.study.config;
 
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.qdrant.QdrantEmbeddingStore;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.QdrantGrpcClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,16 +16,34 @@ public class LLMConfig
     @Bean
     public EmbeddingModel embeddingModel()
     {
-        return null;
+        return OpenAiEmbeddingModel.builder()
+                .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+                .modelName("qwen3-vl-rerank")
+                .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .build();
     }
 
+    /**
+     * 创建qdrant客户端
+     *
+     * @return
+     */
     @Bean
     public QdrantClient qdrantClient() {
-        return null;
+        QdrantGrpcClient.Builder newBuilder = QdrantGrpcClient.newBuilder("localhost", 6374, false);
+        return new QdrantClient(newBuilder.build());
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {
-        return null;
+        return QdrantEmbeddingStore.builder()
+                .host("localhost")
+                .port(6333)
+                .collectionName("test-qdrant")
+                .build();
     }
 }

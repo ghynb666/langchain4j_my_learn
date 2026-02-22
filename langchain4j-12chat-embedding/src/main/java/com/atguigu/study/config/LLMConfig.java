@@ -48,9 +48,9 @@ public class LLMConfig
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {
         return QdrantEmbeddingStore.builder()
-                .host("127.0.0.1")
-                .port(6333)
-                .collectionName("test-qdrant")
+                .host("127.0.0.1") // Qdrant服务主机地址
+                .port(6333)        // Qdrant服务端口
+                .collectionName("test-qdrant") // 向量存储集合名称
                 .build();
     }
 }
