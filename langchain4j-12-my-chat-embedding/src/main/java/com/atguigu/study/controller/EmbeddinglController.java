@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
 
-/**
- * @auther zzyybs@126.com
- * @Date 2025-06-02 20:47
- * @Description: 知识出处，https://docs.langchain4j.dev/tutorials/rag#embedding-store
- */
 @RestController
 @Slf4j
 public class EmbeddinglController
@@ -32,11 +27,6 @@ public class EmbeddinglController
     @Resource
     private EmbeddingStore<TextSegment> embeddingStore;
 
-    /**
-     * 文本向量化测试，看看形成向量后的文本
-     * http://localhost:9012/embedding/embed
-     * @return
-     */
     @GetMapping(value = "/embedding/embed")
     public String embed()
     {
@@ -47,31 +37,25 @@ public class EmbeddinglController
                 金羽披霞彩，
                 昂首步高岗。
                 """;
-        Response<Embedding> embeddingResponse = embeddingModel.embed(prompt);
+        Response<Embedding> embed = embeddingModel.embed(prompt);
 
-        System.out.println(embeddingResponse);
-
-        return embeddingResponse.content().toString();
+        return embed.content().toString();
     }
 
-    /**
-     * 新建向量数据库实例和创建索引：test-qdrant
-     * 类似mysql create database test-qdrant
-     * http://localhost:9012/embedding/createCollection
-     */
     @GetMapping(value = "/embedding/createCollection")
     public void createCollection()
     {
-        var vectorParams = Collections.VectorParams.newBuilder()
+        // 1. 创建向量参数配置构建器
+        Collections.VectorParams vectorParams = Collections.VectorParams.newBuilder()
+                // 2. 设置距离度量方式为余弦相似度 (Cosine)，这是文本向量最常用的度量方式
                 .setDistance(Collections.Distance.Cosine)
+                // 3. 设置向量维度为1024，必须与使用的Embedding模型输出维度一致
                 .setSize(1024)
                 .build();
-        qdrantClient.createCollectionAsync("test-qdrant", vectorParams);
+        // 4. 异步创建一个名为"test-qdrant"的集合（类似于关系型数据库中的表）
+        qdrantClient.createCollectionAsync("test-qdrant",vectorParams);
     }
 
-    /*
-     往向量数据库新增文本记录
-     */
     @GetMapping(value = "/embedding/add")
     public String add()
     {
@@ -82,40 +66,52 @@ public class EmbeddinglController
                 金羽披霞彩，
                 昂首步高岗。
                 """;
-        TextSegment segment1 = TextSegment.from(prompt);
-        segment1.metadata().put("author", "zzyy");
-        Embedding embedding1 = embeddingModel.embed(segment1).content();
-        String result = embeddingStore.add(embedding1, segment1);
 
-        System.out.println(result);
-
-        return result;
+        // 1. 将原始文本封装为 TextSegment 对象，这是 LangChain4j 中处理文本的基本单元
+        TextSegment segment = TextSegment.from(prompt);
+        // 2. 为文本段添加元数据（Metadata），例如作者、来源、日期等
+        // 元数据非常重要，后续检索时可以基于元数据进行过滤（如：只查"haoyu"写的诗）
+        segment.metadata().put("author","haoyu");
+        
+        // 3. 调用 EmbeddingModel 将文本段转换为向量（Embedding）
+        // 这里会将 TextSegment 发送给 AI 模型（如 OpenAI 或 DashScope），返回一个高维向量（如 1024 维的 float 数组）
+        Embedding content = embeddingModel.embed(segment).content();
+        
+        // 4. 将向量（Embedding）和对应的原始文本（TextSegment）一起存入向量数据库（EmbeddingStore）
+        // 存储后，既可以通过向量相似度搜索到这段文本，也可以获取其元数据
+        // 返回值通常是存储记录的 ID
+        return embeddingStore.add(content,segment);
     }
 
     @GetMapping(value = "/embedding/query1")
     public void query1(){
-        Embedding queryEmbedding = embeddingModel.embed("咏鸡说的是什么").content();
+        //1. 先向量化文本内容
+        Embedding content = embeddingModel.embed("咏鸡讲的是什么？").content();
+
+        //2. 构建查询向量数据库的查询条件
         EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder()
-                .queryEmbedding(queryEmbedding)
+                .queryEmbedding(content)
                 .maxResults(1)
                 .build();
+        //3. 查询
         EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(embeddingSearchRequest);
-        System.out.println(searchResult.matches().get(0).embedded().text());
     }
 
     @GetMapping(value = "/embedding/query2")
     public void query2(){
-        Embedding queryEmbedding = embeddingModel.embed("咏鸡").content();
+        //1. 向量化文本
+        Embedding content = embeddingModel.embed("咏鸡").content();
 
+        //2. 构建向量数据库查询条件
         EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder()
-                .queryEmbedding(queryEmbedding)
-                .filter(metadataKey("author").isEqualTo("zzyy2"))
+                .queryEmbedding(content)
+                .filter(metadataKey("author").isEqualTo("haoyu"))
                 .maxResults(1)
                 .build();
 
+        //3, 查询
         EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(embeddingSearchRequest);
 
         System.out.println(searchResult.matches().get(0).embedded().text());
     }
 }
-
