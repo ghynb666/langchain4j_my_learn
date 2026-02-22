@@ -35,8 +35,10 @@ public class LLMConfig
     }
 
     /**
-     *
-     * @return
+     * 创建Qdrant向量存储实例
+     * 用于存储和检索文本片段的向量嵌入
+     * 
+     * @return QdrantEmbeddingStore实例，配置连接到本地Qdrant服务
      */
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {
