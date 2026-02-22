@@ -25,7 +25,7 @@ public class LLMConfig
     {
         return OpenAiEmbeddingModel.builder()
                     .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-                    .modelName("qwen3-vl-rerank")
+                    .modelName("qwen3-vl-embedding")
                     .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }

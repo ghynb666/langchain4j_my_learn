@@ -18,7 +18,7 @@ public class LLMConfig
     {
         return OpenAiEmbeddingModel.builder()
                 .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
-                .modelName("qwen3-vl-rerank")
+                .modelName("text-embedding-v3")
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .build();
     }
@@ -30,7 +30,7 @@ public class LLMConfig
      */
     @Bean
     public QdrantClient qdrantClient() {
-        QdrantGrpcClient.Builder newBuilder = QdrantGrpcClient.newBuilder("localhost", 6374, false);
+        QdrantGrpcClient.Builder newBuilder = QdrantGrpcClient.newBuilder("localhost", 6334, false);
         return new QdrantClient(newBuilder.build());
     }
 
@@ -44,7 +44,7 @@ public class LLMConfig
     public EmbeddingStore<TextSegment> embeddingStore() {
         return QdrantEmbeddingStore.builder()
                 .host("localhost")
-                .port(6333)
+                .port(6334)
                 .collectionName("test-qdrant")
                 .build();
     }

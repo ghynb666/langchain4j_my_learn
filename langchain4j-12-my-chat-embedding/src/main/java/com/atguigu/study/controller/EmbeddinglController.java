@@ -7,12 +7,15 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
 
 import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
 
@@ -85,33 +88,56 @@ public class EmbeddinglController
 
     @GetMapping(value = "/embedding/query1")
     public void query1(){
-        //1. 先向量化文本内容
+        //1. 先向量化待查询的文本内容
+        // 这里需要将用户的自然语言问题（如"咏鸡讲的是什么？"）转换成向量
+        // 关键点：查询用的 Embedding 模型必须和入库时用的模型完全一致，否则向量空间不匹配，查出的结果无意义
         Embedding content = embeddingModel.embed("咏鸡讲的是什么？").content();
+        System.out.println("Query Vector Dimension: " + content.vector().length);
+        if (content.vector().length == 0) {
+            System.err.println("CRITICAL ERROR: Embedding vector is empty! This usually means the API call failed to parse the vector.");
+        }
 
-        //2. 构建查询向量数据库的查询条件
+        //2. 构建向量数据库的搜索请求对象
         EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder()
-                .queryEmbedding(content)
-                .maxResults(1)
+                .queryEmbedding(content) // 设置查询向量
+                .maxResults(1) // 设置最大返回结果数（Top-K），这里只取相似度最高的 1 条
                 .build();
-        //3. 查询
+        
+        //3. 执行查询
+        // 在向量数据库中进行相似度搜索（通常是计算余弦相似度），找出最匹配的 TextSegment
         EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(embeddingSearchRequest);
+        
+        // 打印结果
+        if (!searchResult.matches().isEmpty()) {
+            System.out.println("查询结果：" + searchResult.matches().get(0).embedded().text());
+        }
     }
 
     @GetMapping(value = "/embedding/query2")
     public void query2(){
-        //1. 向量化文本
+        //1. 向量化查询文本
         Embedding content = embeddingModel.embed("咏鸡").content();
 
-        //2. 构建向量数据库查询条件
+        //2. 构建带过滤条件的搜索请求
         EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder()
                 .queryEmbedding(content)
+                // 添加元数据过滤条件：只查询 author = "haoyu" 的记录
+                // 这被称为 "混合检索"（Hybrid Search）或 "带过滤的向量检索"
+                // metadataKey 需要静态导入: import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
                 .filter(metadataKey("author").isEqualTo("haoyu"))
                 .maxResults(1)
                 .build();
 
-        //3, 查询
+        //3. 执行查询
         EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(embeddingSearchRequest);
 
-        System.out.println(searchResult.matches().get(0).embedded().text());
+        // 4. 获取并打印匹配结果
+        if (!searchResult.matches().isEmpty()) {
+            // matches() 返回的是 List<EmbeddingMatch<TextSegment>>
+            // get(0) 获取最相似的那条记录
+            // embedded() 获取其中封装的 TextSegment 对象
+            // text() 获取原始文本内容
+            System.out.println("带过滤条件的查询结果：" + searchResult.matches().get(0).embedded().text());
+        }
     }
 }
