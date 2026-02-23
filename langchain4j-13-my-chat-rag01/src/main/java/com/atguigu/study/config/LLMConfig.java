@@ -28,7 +28,11 @@ public class LLMConfig
     @Bean
     public ChatModel chatModel()
     {
-        return null;
+        return OpenAiChatModel.builder()
+                .apiKey(System.getenv("AI_DASHSCOPE_API_KEY"))
+                .modelName("qwen3.5-plus")
+                .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .build();
     }
 
     /**
@@ -41,12 +45,16 @@ public class LLMConfig
      */
     @Bean
     public InMemoryEmbeddingStore<TextSegment> embeddingStore() {
-        return null;
+        return new InMemoryEmbeddingStore<>();
     }
 
     @Bean
     public ChatAssistant assistant(ChatModel chatModel, EmbeddingStore<TextSegment> embeddingStore)
     {
-        return null;
+        return AiServices.builder(ChatAssistant.class)
+                .chatModel(chatModel)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(50))
+                .contentRetriever(EmbeddingStoreContentRetriever.from(embeddingStore))
+                .build();
     }
 }
